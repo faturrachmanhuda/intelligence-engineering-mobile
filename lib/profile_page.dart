@@ -195,7 +195,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         const Divider(color: Color(0xFFF1F5F9), height: 24),
                         _buildInfoRow(Icons.devices_rounded, 'Tipe Sesi', 'Sesi Mobile'),
                         const Divider(color: Color(0xFFF1F5F9), height: 24),
-                        _buildInfoRow(Icons.link_rounded, 'Host Server', 'http://192.168.1.6:8000'),
+                        _buildInfoRow(Icons.link_rounded, 'Host Server', 'http://38.47.94.194/tif2/engineering'),
                       ],
                     ),
                   ),

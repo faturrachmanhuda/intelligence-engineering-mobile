@@ -5,7 +5,7 @@ import '../models/project_model.dart';
 class ApiService {
   // Gunakan 192.168.1.6 untuk aplikasi Windows/Desktop. 
   // Jika di Android emulator, gunakan 192.168.1.6.
-  static const String baseUrl = 'http://192.168.1.6:8000/api';
+  static const String baseUrl = 'http://38.47.94.194/tif2/engineering/api';
 
   Future<List<ProjectInitiation>> getProjects() async {
     try {

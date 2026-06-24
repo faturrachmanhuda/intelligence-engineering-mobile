@@ -2342,7 +2342,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      final link = 'http://192.168.1.6:8000/projects/${initiation.id}/blueprint/';
+                      final link = 'http://38.47.94.194/tif2/engineering/projects/${initiation.id}/blueprint/';
                       Clipboard.setData(ClipboardData(text: link));
                       setState(() {
                         _copiedBlueprintId = initiation.id;
@@ -3179,7 +3179,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _downloadReportPdf(int month, int year) async {
-    final url = Uri.parse('http://192.168.1.6:8000/reports/download/?month=$month&year=$year');
+    final url = Uri.parse('http://38.47.94.194/tif2/engineering/reports/download/?month=$month&year=$year');
     try {
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);

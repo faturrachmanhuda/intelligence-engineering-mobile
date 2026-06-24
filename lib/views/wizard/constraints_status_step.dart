@@ -1,0 +1,419 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../viewmodels/wizard/wizard_viewmodel.dart';
+
+class ConstraintsStatusStep extends StatelessWidget {
+  const ConstraintsStatusStep({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.read<WizardViewModel>().constraintsStatusVM;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      child: Form(
+        key: vm.formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Batasan Pengembangan
+            _buildComplexListSection(
+              context: context,
+              title: 'Batasan Pengembangan',
+              icon: Icons.block_rounded,
+              accentColor: const Color(0xFF2563EB),
+              items: vm.constraints,
+              onAdd: () => vm.addConstraint(),
+              onRemove: (index) => vm.removeConstraint(index),
+              fields: [
+                {'key': 'category', 'label': 'Kategori Batasan'},
+                {'key': 'description', 'label': 'Deskripsi'},
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Status Realisasi Modul Cerdas
+            _buildModuleStatusSection(context, vm),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModuleStatusSection(BuildContext context, dynamic vm) {
+    return Consumer<WizardViewModel>(
+      builder: (context, wizardVm, child) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF00C88C), size: 20),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Status Realisasi Modul',
+                    style: TextStyle(
+                      color: Color(0xFF00C88C),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Progress Bar
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Progress Keseluruhan', style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
+                      Text(
+                        '${vm.completionPercentage.toStringAsFixed(0)}%',
+                        style: const TextStyle(color: Color(0xFF00C88C), fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: vm.moduleStatuses.isEmpty ? 0 : vm.completionPercentage / 100,
+                      backgroundColor: Colors.black.withValues(alpha: 0.05),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00C88C)),
+                      minHeight: 8,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              ...List.generate(vm.moduleStatuses.length, (index) {
+                final module = vm.moduleStatuses[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Modul ${index + 1}',
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (index > 0)
+                            InkWell(
+                              onTap: () => vm.removeModuleStatus(index),
+                              borderRadius: BorderRadius.circular(8),
+                              child: const Padding(
+                                padding: EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: Colors.redAccent,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: module['module'],
+                        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
+                        validator: (value) {
+                          if (index == 0 && (value == null || value.trim().isEmpty)) {
+                            return 'Wajib diisi';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Nama Modul / Fungsi',
+                          labelStyle: const TextStyle(
+                            color: Color(0xFF64748B),
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFF00C88C), width: 1.5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        value: module['status'],
+                        decoration: InputDecoration(
+                          labelText: 'Status',
+                          labelStyle: const TextStyle(
+                            color: Color(0xFF64748B),
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                        ),
+                        dropdownColor: Colors.white,
+                        style: const TextStyle(color: Color(0xFF0F172A)),
+                        items: const [
+                          DropdownMenuItem(value: 'not_started', child: Text('Belum Mulai', style: TextStyle(color: Color(0xFF0F172A)))),
+                          DropdownMenuItem(value: 'in_progress', child: Text('Sedang Berjalan', style: TextStyle(color: Color(0xFF0F172A)))),
+                          DropdownMenuItem(value: 'done', child: Text('Selesai', style: TextStyle(color: Color(0xFF0F172A)))),
+                          DropdownMenuItem(value: 'blocked', child: Text('Terhambat', style: TextStyle(color: Color(0xFF0F172A)))),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) vm.setModuleStatus(index, val);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: module['notes'],
+                        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
+                        decoration: InputDecoration(
+                          labelText: 'Catatan (Opsional)',
+                          labelStyle: const TextStyle(
+                            color: Color(0xFF64748B),
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFF00C88C), width: 1.5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              TextButton.icon(
+                onPressed: () => vm.addModuleStatus(),
+                icon: const Icon(Icons.add, color: Color(0xFF00C88C), size: 18),
+                label: const Text(
+                  'Tambah Modul',
+                  style: TextStyle(
+                    color: Color(0xFF00C88C),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFF00C88C).withValues(alpha: 0.1),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildComplexListSection({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required Color accentColor,
+    required List<Map<String, TextEditingController>> items,
+    required VoidCallback onAdd,
+    required void Function(int) onRemove,
+    required List<Map<String, String>> fields,
+  }) {
+    return Consumer<WizardViewModel>(
+      builder: (context, wizardVm, child) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: accentColor, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: accentColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              ...List.generate(items.length, (index) {
+                final item = items[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Item ${index + 1}',
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (index > 0)
+                            InkWell(
+                              onTap: () => onRemove(index),
+                              borderRadius: BorderRadius.circular(8),
+                              child: const Padding(
+                                padding: EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: Colors.redAccent,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ...fields.map((f) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: TextFormField(
+                            controller: item[f['key']],
+                            style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
+                            validator: (value) {
+                              if (index == 0 && (value == null || value.trim().isEmpty)) {
+                                return 'Wajib diisi';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              labelText: f['label'],
+                              labelStyle: const TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 14,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: accentColor, width: 1.5),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                );
+              }),
+              TextButton.icon(
+                onPressed: onAdd,
+                icon: Icon(Icons.add, color: accentColor, size: 18),
+                label: Text(
+                  'Tambah Data',
+                  style: TextStyle(
+                    color: accentColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: accentColor.withValues(alpha: 0.1),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

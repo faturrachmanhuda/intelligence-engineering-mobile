@@ -220,7 +220,11 @@ class ApiService {
       },
       'experiences': {
         'presentation': {
-          'types': (formData['step_2']?['presentations'] as List?)?.map((e) => {'label': e}).toList() ?? [],
+          'types': (formData['step_2']?['presentations'] as List?)?.map((e) {
+            final str = e.toString();
+            final capitalized = str.isEmpty ? '' : '${str[0].toUpperCase()}${str.substring(1)}';
+            return {'label': capitalized};
+          }).toList() ?? [],
           'description': formData['step_2']?['presentation_description'] ?? '',
         },
         'functions': formData['step_2']?['functions'] ?? [],

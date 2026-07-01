@@ -26,7 +26,19 @@ class ConstraintsStatusStep extends StatelessWidget {
               onAdd: () => vm.addConstraint(),
               onRemove: (index) => vm.removeConstraint(index),
               fields: [
-                {'key': 'category', 'label': 'Kategori Batasan'},
+                {
+                  'key': 'category',
+                  'label': 'Kategori Batasan',
+                  'type': 'dropdown',
+                  'options': [
+                    {'value': 'data', 'label': 'Data'},
+                    {'value': 'infra', 'label': 'Infrastruktur'},
+                    {'value': 'waktu', 'label': 'Waktu'},
+                    {'value': 'sdm', 'label': 'SDM'},
+                    {'value': 'biaya', 'label': 'Biaya'},
+                    {'value': 'lainnya', 'label': 'Lainnya'},
+                  ],
+                },
                 {'key': 'description', 'label': 'Deskripsi'},
               ],
             ),
@@ -274,7 +286,7 @@ class ConstraintsStatusStep extends StatelessWidget {
     required List<Map<String, TextEditingController>> items,
     required VoidCallback onAdd,
     required void Function(int) onRemove,
-    required List<Map<String, String>> fields,
+    required List<Map<String, dynamic>> fields,
   }) {
     return Consumer<WizardViewModel>(
       builder: (context, wizardVm, child) {
@@ -352,6 +364,51 @@ class ConstraintsStatusStep extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       ...fields.map((f) {
+                        if (f['type'] == 'dropdown') {
+                          final options = f['options'] as List<Map<String, String>>;
+                          final currentValue = item[f['key']]?.text;
+                          final hasValue = currentValue != null && currentValue.isNotEmpty;
+                          
+                          // Ensure the currentValue is within options, if not, set to null
+                          final isValidValue = hasValue && options.any((opt) => opt['value'] == currentValue);
+                          final dropdownValue = isValidValue ? currentValue : null;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: DropdownButtonFormField<String>(
+                              value: dropdownValue,
+                              items: options.map((opt) {
+                                return DropdownMenuItem<String>(
+                                  value: opt['value'],
+                                  child: Text(opt['label']!),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  item[f['key']]?.text = val;
+                                }
+                              },
+                              validator: (value) {
+                                if (index == 0 && (value == null || value.trim().isEmpty)) {
+                                  return 'Wajib dipilih';
+                                }
+                                return null;
+                              },
+                              style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
+                              decoration: InputDecoration(
+                                labelText: f['label'],
+                                labelStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
+                              ),
+                            ),
+                          );
+                        }
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: TextFormField(

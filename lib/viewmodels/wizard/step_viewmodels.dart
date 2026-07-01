@@ -314,8 +314,12 @@ class IntelligenceExperienceViewModel extends WizardStepViewModel {
   }
 
   void addFunction() {
+    final nameCtrl = TextEditingController();
+    nameCtrl.addListener(() {
+      notifyListeners();
+    });
     _functions.add({
-      'name': TextEditingController(),
+      'name': nameCtrl,
       'description': TextEditingController(),
     });
     notifyListeners();
